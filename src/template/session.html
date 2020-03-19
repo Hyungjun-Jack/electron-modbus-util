@@ -1,0 +1,82 @@
+<template class="add-template">
+  <div class="container" style="background-color: rgb(163, 167, 161);">
+    <button id="btnAddSession">Modbus/TCP 세션 추가</button>
+  </div>
+</template>
+<template class="session-template">
+  <div class="container">
+    <div class="header">
+      Modbus/TCP 접속 정보
+    </div>
+    <div class="body">
+      <div class="row">
+        <div class="title">제품 IP 주소</div>
+        <div>
+          <input id="deviceAddress" value="192.168.0.17" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="title">포트번호</div>
+        <div>
+          <input id="devicePortNubmer" value="502" />
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnConnect">접속</button>
+      </div>
+    </div>
+    <div class="header">
+      Modbus/TCP 쿼리 전송
+    </div>
+    <div class="body">
+      <div class="row">
+        <div class="title">함수코드</div>
+        <div>
+          <select id="fc">
+            <option>READ COILS (FC 01)</option>
+            <option>READ DISCRETE INPUTS (FC 02)</option>
+            <option>READ HOLDING REGISTERS (FC 03)</option>
+            <option>READ INPUT REGISTERS (FC 04)</option>
+            <option>WRITE SINGLE COIL (FC 05)</option>
+            <option>WRITE SINGLE REGISTER (FC 06)</option>
+            <option>WRITE MULTIPLE COILS (FC 15)</option>
+            <option>WRITE MULTIPLE REGISTERS (FC 16)</option>
+            <option>PULSE (FC 105)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="title">시작주소</div>
+        <div>
+          <input id="startAddress" />
+        </div>
+      </div>
+      <div class="row">
+        <div id="quantityTitle" class="title">개수</div>
+        <div>
+          <input id="quantity" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="title">값</div>
+        <div>
+          <input id="value" />
+          <select id="valueCoil" style="display: none;">
+            <option value="1">TRUE</option>
+            <option value="0">FALSE</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnSendQuery">쿼리전송</button>
+      </div>
+    </div>
+    <div class="header">
+      로그
+      <button id="btnClearLog">삭제</button>
+    </div>
+    <div class="container">
+      <pre id="log"></pre>
+    </div>
+  </div>
+</template>

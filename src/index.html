@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="index.css" />
+    <link rel="import" id="import-session" href="template/session.html" />
+  </head>
+  <body>
+    <div class="make-session sticky" style="display: flex;width:100vw"></div>
+    <div class="modbus-tcp-sessions" style="display: flex;flex-wrap:wrap;width:100vw"></div>
+  </body>
+  <script>
+    require("./renderer-process/session.js");
+    // const connect = () => {
+    //   const title = document.getElementById("btnConnect").innerHTML;
+    //   switch (title) {
+    //     case "접속":
+    //       document.getElementById("btnConnect").innerHTML = "접속 시도 중";
+    //       makeConnection();
+    //       break;
+    //     case "접속종료":
+    //       document.getElementById("btnConnect").innerHTML = "접속";
+    //       break;
+    //     case "접속 시도 중":
+    //       return;
+    //       break;
+    //   }
+    // };
+
+    // const makeConnection = () => console.log("makeConnection");
+    const buf1 = Buffer.from("12345678", "hex");
+    console.log(buf1);
+    console.log(buf1.length);
+    console.log(buf1.readUInt16BE(0));
+    console.log(buf1.readUInt16BE(1));
+
+    const hex = require("hexer");
+
+    const buf2 = Buffer.alloc(2);
+    buf2.writeUInt16BE(buf1.readUInt16BE(0));
+    console.log(hex(buf2));
+
+    const date = new Date();
+    const formattedTime = date.getHours() + ":" + ("0" + date.getMinutes()).substr(-2) + ":" + ("0" + date.getSeconds()).substr(-2);
+    console.log(formattedTime);
+  </script>
+</html>
