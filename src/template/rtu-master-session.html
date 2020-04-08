@@ -1,0 +1,85 @@
+<template class="add-template">
+  <div style="height: 50px; display: flex; margin: 5px;">
+    <button id="btnAddModbusRtuMasterSession">Modbus/RTU MASTER 추가</button>
+  </div>
+</template>
+<template class="rtu-session-template">
+  <div class="container">
+    <div class="header">
+      Modbus/RTU MASTER 접속 정보
+    </div>
+    <div class="body">
+      <div class="row">
+        <div class="title">COM 포트</div>
+        <div id="serialPortList"></div>
+      </div>
+      <div class="row">
+        <div class="title">SLAVE ADDRESS</div>
+        <div>
+          <input id="slaveAddress" value="1" />
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnConnectSerialPort">열기</button>
+      </div>
+    </div>
+    <div class="header">
+      쿼리 전송
+    </div>
+    <div class="body">
+      <div class="row">
+        <div class="title">함수코드</div>
+        <div>
+          <select id="fc">
+            <option>READ COILS (FC 01)</option>
+            <option>READ DISCRETE INPUTS (FC 02)</option>
+            <option>READ HOLDING REGISTERS (FC 03)</option>
+            <option>READ INPUT REGISTERS (FC 04)</option>
+            <option>WRITE SINGLE COIL (FC 05)</option>
+            <option>WRITE SINGLE REGISTER (FC 06)</option>
+            <option>WRITE MULTIPLE COILS (FC 15)</option>
+            <option>WRITE MULTIPLE REGISTERS (FC 16)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="title">시작주소</div>
+        <div>
+          <input id="startAddress" value="0" />
+        </div>
+      </div>
+      <div class="row">
+        <div id="quantityTitle" class="title">개수</div>
+        <div>
+          <input id="quantity" value="1" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="title">값</div>
+        <div>
+          <input id="value" />
+          <select id="valueCoil" style="display: none;">
+            <option value="1">TRUE</option>
+            <option value="0">FALSE</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnSendQuery">쿼리전송</button>
+      </div>
+    </div>
+    <div class="header">
+      로그
+    </div>
+    <div class="body">
+      <div class="row">
+        <div class="container" style="min-width: 400px;">
+          <pre id="log"></pre>
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnClearLog">삭제</button>
+      </div>
+    </div>
+  </div>
+</template>

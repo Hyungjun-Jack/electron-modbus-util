@@ -3,14 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="index.css" />
-    <link rel="import" id="import-session" href="template/session.html" />
+    <link rel="import" id="import-tcp-master-session" href="template/tcp-master-session.html" />
+    <link rel="import" id="import-tcp-slave-session" href="template/tcp-slave-session.html" />
+    <link rel="import" id="import-rtu-slave-session" href="template/rtu-slave-session.html" />
+    <link rel="import" id="import-rtu-master-session" href="template/rtu-master-session.html" />
+    <link rel="import" id="import-ascii-slave-session" href="template/ascii-slave-session.html" />
   </head>
   <body>
-    <div class="make-session sticky" style="display: flex;width:100vw"></div>
-    <div class="modbus-tcp-sessions" style="display: flex;flex-wrap:wrap;width:100vw"></div>
+    <div class="make-session sticky" style="display: flex; width: 100vw; margin-bottom: 10px;"></div>
+    <div class="modbus-tcp-sessions" style="display: flex; flex-wrap: wrap; width: 100vw;"></div>
+    <div class="modbus-rtu-ascii-sessions" style="display: flex; flex-wrap: wrap; width: 100vw;"></div>
   </body>
   <script>
-    require("./renderer-process/session.js");
+    const SerialPort = require("serialport");
+    let serialPortList;
+    SerialPort.list().then((ports) => {
+      let values = Object.values(ports);
+      serialPortList = values
+        .filter((value) => {
+          const { path } = value;
+          return path.startsWith("NULL_") === false;
+        })
+        .sort((a, b) => {
+          const { path: path_a } = a;
+          const { path: path_b } = b;
+
+          const item1 = parseInt(path_a.replace(/[A-Z]/g, ""), 10);
+          const item2 = parseInt(path_b.replace(/[A-Z]/g, ""), 10);
+
+          if (item1 < item2) {
+            return -1;
+          }
+          if (item1 > item2) {
+            return 1;
+          }
+          return 0;
+        });
+
+      console.log(serialPortList);
+      // makeRtuSession();
+    });
+
+    require("./renderer-process/tcp-master-session.js");
+    require("./renderer-process/tcp-slave-session.js");
+    require("./renderer-process/rtu-slave-session.js");
+    require("./renderer-process/rtu-master-session.js");
+    require("./renderer-process/ascii-slave-session.js");
     // const connect = () => {
     //   const title = document.getElementById("btnConnect").innerHTML;
     //   switch (title) {

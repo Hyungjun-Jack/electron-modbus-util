@@ -1,18 +1,18 @@
 <template class="add-template">
-  <div class="container" style="background-color: rgb(163, 167, 161);">
-    <button id="btnAddSession">Modbus/TCP 세션 추가</button>
+  <div style="height: 50px; display: flex; margin: 5px;">
+    <button id="btnAddModbusTcpMasterSession">Modbus/TCP MASTER 추가</button>
   </div>
 </template>
 <template class="session-template">
   <div class="container">
     <div class="header">
-      Modbus/TCP 접속 정보
+      Modbus/TCP MASTER 접속 정보
     </div>
     <div class="body">
       <div class="row">
         <div class="title">제품 IP 주소</div>
         <div>
-          <input id="deviceAddress" value="192.168.0.17" />
+          <input id="deviceAddress" value="192.168.0.14" />
         </div>
       </div>
       <div class="row">
@@ -26,7 +26,7 @@
       </div>
     </div>
     <div class="header">
-      Modbus/TCP 쿼리 전송
+      쿼리 전송
     </div>
     <div class="body">
       <div class="row">
@@ -48,13 +48,13 @@
       <div class="row">
         <div class="title">시작주소</div>
         <div>
-          <input id="startAddress" />
+          <input id="startAddress" value="0" />
         </div>
       </div>
       <div class="row">
         <div id="quantityTitle" class="title">개수</div>
         <div>
-          <input id="quantity" />
+          <input id="quantity" value="1" />
         </div>
       </div>
       <div class="row">
@@ -73,10 +73,17 @@
     </div>
     <div class="header">
       로그
-      <button id="btnClearLog">삭제</button>
     </div>
-    <div class="container">
-      <pre id="log"></pre>
+    <div class="body">
+      <div class="row">
+        <div class="container" style="min-width: 400px;">
+          <pre id="log"></pre>
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnClearLog">삭제</button>
+      </div>
     </div>
   </div>
 </template>
+<template class="rtu-session-template"></template>

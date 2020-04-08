@@ -1,41 +1,39 @@
 const { ipcRenderer } = require("electron");
-const net = require("net");
 const Modbus = require("jsmodbus");
 const hex = require("hexer");
-
+const SerialPort = require("serialport");
 const hexOption = { divide: "|", headSep: "|" };
 
-const link = document.querySelector("#import-session");
+const { addLog, makeSerialPortSelect } = require("./common");
+
+const link = document.querySelector("#import-rtu-master-session");
 let template = link.import.querySelector(".add-template");
 let clone = document.importNode(template.content, true);
 document.querySelector(".make-session").appendChild(clone);
 
-const addLog = (div, message) => {
-  const date = new Date();
-  const formattedTime = date.getHours() + ":" + ("0" + date.getMinutes()).substr(-2) + ":" + ("0" + date.getSeconds()).substr(-2);
-
-  div.innerHTML += `(${formattedTime}) ${message}\r\n`;
-  if (div.isScrollBottom) {
-    div.scrollTop = div.scrollHeight;
-  }
-};
-
-const makeSession = () => {
-  let template = link.import.querySelector(".session-template");
+const makeRtuSession = () => {
+  let template = link.import.querySelector(".rtu-session-template");
 
   let clone = document.importNode(template.content, true);
 
-  const host = clone.getElementById("deviceAddress");
-  const port = clone.getElementById("devicePortNubmer");
+  const serialPortDiv = clone.getElementById("serialPortList");
+  const serialPortSelect = makeSerialPortSelect(serialPortDiv);
+  const slaveAddress = clone.getElementById("slaveAddress");
+  const btn = clone.getElementById("btnConnectSerialPort");
+
   const log = clone.getElementById("log");
   log.isScrollBottom = true;
+  log.addEventListener("scroll", (event) => {
+    if (event.target.scrollHeight - event.target.scrollTop === event.target.clientHeight) {
+      log.isScrollBottom = true;
+    } else {
+      log.isScrollBottom = false;
+    }
+  });
   const btnClearLog = clone.getElementById("btnClearLog");
-  // const socket = new net.Socket();
-  let socket = null;
-  // const modbus = new Modbus.client.TCP(socket, 1);
-  let modbus = null;
-  const btn = clone.getElementById("btnConnect");
-  const btnSendQuery = clone.getElementById("btnSendQuery");
+  btnClearLog.addEventListener("click", (event) => {
+    log.innerHTML = "";
+  });
 
   const fc = clone.getElementById("fc");
   const startAddress = clone.getElementById("startAddress");
@@ -43,10 +41,11 @@ const makeSession = () => {
   const quantityTitle = clone.getElementById("quantityTitle");
   const value = clone.getElementById("value");
   const valueCoil = clone.getElementById("valueCoil");
+  const btnSendQuery = clone.getElementById("btnSendQuery");
 
-  const param = { btn, host, port, log, socket, modbus, query: { fc, startAddress, quantity, quantityTitle, value, valueCoil } };
+  const param = { btn, serialPortSelect, slaveAddress, serialPort: null, log, modbusRtu: null, query: { fc, startAddress, quantity, quantityTitle, value, valueCoil } };
 
-  fc.addEventListener("change", event => {
+  fc.addEventListener("change", (event) => {
     if (fc.selectedIndex === 4 || fc.selectedIndex === 8) {
       value.style.display = "none";
       valueCoil.style.display = "block";
@@ -54,94 +53,74 @@ const makeSession = () => {
       value.style.display = "block";
       valueCoil.style.display = "none";
     }
-
-    if (fc.selectedIndex === 8) {
-      quantityTitle.innerHTML = "시간(40 ~ 10,000)";
-    } else {
-      quantityTitle.innerHTML = "개수";
-    }
   });
 
-  log.addEventListener("scroll", event => {
-    // console.log("scroll", event.target.offsetHeight, event.target.scrollTop, event.target.scrollHeight);
-
-    if (event.target.scrollHeight - event.target.scrollTop === event.target.clientHeight) {
-      // console.log("The scroll arrived at bottom");
-      log.isScrollBottom = true;
-    } else {
-      log.isScrollBottom = false;
-    }
+  clone.getElementById("btnConnectSerialPort").addEventListener("click", (event) => {
+    openSerialPort(param);
   });
 
-  btnClearLog.addEventListener("click", event => {
-    log.innerHTML = "";
-  });
-
-  clone.getElementById("btnConnect").addEventListener("click", event => {
-    connect(param);
-  });
-
-  btnSendQuery.addEventListener("click", event => {
+  btnSendQuery.addEventListener("click", () => {
     let buffer, _quantity, byteCount;
 
-    const { fc, startAddress, quantity, value } = param.query;
-    let { socket, modbus } = param;
+    const {
+      modbusRtu,
+      query: { fc, startAddress, quantity, value },
+    } = param;
 
-    if (socket === null || modbus === null) {
-      addLog(log, "no connection to modbus server");
+    if (modbusRtu === null) {
+      addLog(log, "COM가 닫혀 있습니다.");
       return;
     }
 
     switch (fc.selectedIndex) {
-      case 0: //READ COILS (FC 01)
-        modbus
+      case 0: // READ COILS (FC 01)
+        modbusRtu
           .readCoils(startAddress.value, quantity.value)
           .then((resp, req) => {
-            console.log(resp);
-
+            // console.log(resp, req);
             const {
               response: {
-                body: { valuesAsArray, valuesAsBuffer }
-              }
+                body: { valuesAsArray, valuesAsBuffer },
+              },
             } = resp;
 
             let test = valuesAsArray.map((value, index) => `비트${index}: ${value}\r\n`).join("");
             addLog(log, "\r\n" + test);
             addLog(log, "\r\n" + hex(valuesAsBuffer, hexOption));
           })
-          .catch(err => {
+          .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
           });
         break;
       case 1: //READ DISCRETE INPUTS (FC 02)
-        modbus
+        modbusRtu
           .readDiscreteInputs(startAddress.value, quantity.value)
           .then((resp, req) => {
             console.log(resp);
 
             const {
               response: {
-                body: { valuesAsArray, valuesAsBuffer }
-              }
+                body: { valuesAsArray, valuesAsBuffer },
+              },
             } = resp;
 
             let test = valuesAsArray.map((value, index) => `비트${index}: ${value}\r\n`).join("");
             addLog(log, "\r\n" + test);
             addLog(log, "\r\n" + hex(valuesAsBuffer, hexOption));
           })
-          .catch(err => {
+          .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
           });
         break;
       case 2: //READ HOLDING REGISTERS (FC 03)
-        modbus
+        modbusRtu
           .readHoldingRegisters(startAddress.value, quantity.value)
-          .then(resp => {
+          .then((resp) => {
             console.log(resp);
             const {
               response: {
-                body: { valuesAsArray, valuesAsBuffer }
-              }
+                body: { valuesAsArray, valuesAsBuffer },
+              },
             } = resp;
 
             let test = valuesAsArray.map((value, index) => `레지스터${index}: ${value}\r\n`).join("");
@@ -158,19 +137,19 @@ const makeSession = () => {
 
             addLog(log, "\r\n" + hex(valuesAsBuffer, hexOption));
           })
-          .catch(err => {
+          .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
           });
         break;
       case 3: //READ INPUT REGISTERS (FC 04)
-        modbus
+        modbusRtu
           .readInputRegisters(startAddress.value, quantity.value)
-          .then(resp => {
+          .then((resp) => {
             console.log(resp);
             const {
               response: {
-                body: { valuesAsArray, valuesAsBuffer }
-              }
+                body: { valuesAsArray, valuesAsBuffer },
+              },
             } = resp;
             console.log(valuesAsArray);
             console.log(hex(valuesAsBuffer, hexOption));
@@ -190,18 +169,18 @@ const makeSession = () => {
 
             addLog(log, "\r\n" + hex(valuesAsBuffer, hexOption));
           })
-          .catch(err => {
+          .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
           });
         break;
       case 4: //WRITE SINGLE COIL (FC 05)
-        modbus
+        modbusRtu
           .writeSingleCoil(startAddress.value, valueCoil.value === "1" ? true : false)
-          .then(resp => {
+          .then((resp) => {
             console.log(resp);
             addLog(log, "쿼리 전송 성공");
           })
-          .catch(err => {
+          .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
           });
         break;
@@ -212,13 +191,13 @@ const makeSession = () => {
           return;
         }
 
-        modbus
+        modbusRtu
           .writeSingleRegister(startAddress.value, buffer.readUInt16BE(0))
-          .then(resp => {
+          .then((resp) => {
             console.log(resp);
             addLog(log, "쿼리 전송 성공");
           })
-          .catch(err => {
+          .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
           });
         break;
@@ -240,13 +219,13 @@ const makeSession = () => {
           ipcRenderer.send("open-error-dialog", "값을 확인하세요.");
           return;
         }
-        modbus
+        modbusRtu
           .writeMultipleCoils(startAddress.value, buffer, _quantity)
-          .then(resp => {
+          .then((resp) => {
             console.log(resp);
             addLog(log, "쿼리 전송 성공");
           })
-          .catch(err => {
+          .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
           });
         break;
@@ -269,124 +248,75 @@ const makeSession = () => {
           return;
         }
 
-        modbus
+        modbusRtu
           .writeMultipleRegisters(startAddress.value, buffer)
-          .then(resp => {
+          .then((resp) => {
             console.log(resp);
             addLog(log, "쿼리 전송 성공");
           })
-          .catch(err => {
-            addLog(log, err.response ? err.response.body.message : err.message);
-          });
-        break;
-      case 8: //PULSE (FC 105)
-        // const request = Buffer.alloc(13);
-        // request.writeUInt8(7, 5);
-        // request.writeUInt8(1, 6);
-        // request.writeUInt8(105, 7);
-        // request.writeUInt16BE(parseInt(startAddress.value, 10), 8);
-        // request.writeUInt16BE(parseInt(quantity.value, 10), 10);
-        // request.writeUInt8(valueCoil.value === "1" ? 0xff : 0, 12);
-
-        // if (socket) {
-        //   socket.write(request);
-        // } else {
-        //   addLog(log, "no connection to modbus server");
-        // }
-        modbus
-          .writeFc105(startAddress.value, quantity.value, valueCoil.value === "1" ? true : false)
-          .then(resp => {
-            console.log(resp);
-            addLog(log, "쿼리 전송 성공");
-          })
-          .catch(err => {
+          .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
           });
         break;
     }
   });
 
-  document.querySelector(".modbus-tcp-sessions").appendChild(clone);
+  document.querySelector(".modbus-rtu-ascii-sessions").appendChild(clone);
 };
 
-const connect = parameters => {
+const openSerialPort = (parameters) => {
   // console.log("connect", hostElement.value, portElement.value);
-  const { btn } = parameters;
+  const { btn, slaveAddress, serialPortSelect, log } = parameters;
+  let { serialPort, modbusRtu } = parameters;
+
   const title = btn.innerHTML;
 
+  const path = serialPortSelect.value;
+
+  const modbusRtuLog = (request) => {
+    addLog(log, request.name);
+  };
+
+  const openPath = (path, parameters) => {
+    parameters.serialPort = new SerialPort(path, { baudRate: 9600, dataBits: 8, stopBits: 1, parity: "none" }, (err) => {
+      if (!err) {
+        // parameters.modbusRtu = new Modbus.server.RTU(parameters.serialPort, { coils: Buffer.alloc(1) });
+      } else {
+        addLog(log, err.message);
+      }
+    });
+
+    parameters.modbusRtu = new Modbus.client.RTU(parameters.serialPort, slaveAddress.value);
+
+    parameters.serialPort.on("open", (err) => {
+      console.log(err);
+      btn.innerHTML = "닫기";
+      addLog(log, `${path} 열기 완료`);
+    });
+  };
+
   switch (title) {
-    case "접속":
-      btn.innerHTML = "접속 시도 중";
-      makeConnection(parameters);
+    case "열기":
+      if (serialPort) {
+        serialPort.close((err) => {
+          openPath(path, parameters);
+        });
+      } else {
+        openPath(path, parameters);
+      }
       break;
-    case "접속종료":
-      btn.innerHTML = "접속";
-      closeConnection(parameters);
+    case "닫기":
+      serialPort.close((err) => {
+        if (err) {
+          addLog(log, err.message);
+        }
+        modbusRtu = null;
+        btn.innerHTML = "열기";
+        addLog(log, `${path} 닫기 완료`);
+      });
+
       break;
-    case "접속 시도 중":
-      return;
   }
 };
 
-const makeConnection = parameters => {
-  console.log("makeConnection", parameters);
-
-  const { log, host, port, btn } = parameters;
-  let { socket, modbus } = parameters;
-
-  addLog(log, "TCP 접속 시도 중...");
-
-  if (socket !== null) {
-    socket.destroy();
-    socket = null;
-  }
-
-  if (modbus !== null) {
-    modbus = null;
-  }
-
-  socket = new net.Socket();
-  parameters.socket = socket;
-  parameters.modbus = new Modbus.client.TCP(socket, 1);
-
-  socket.on("connect", socket => {
-    console.log("connect");
-    addLog(log, "접속 완료");
-    btn.innerHTML = "접속종료";
-  });
-
-  socket.on("data", data => {
-    console.log("data:", data, hex(data, hexOption));
-  });
-
-  socket.on("end", () => {
-    addLog(log, "TCP 접속이 종료되었습니다");
-    btn.innerHTML = "접속";
-  });
-
-  socket.on("error", error => {
-    socket.destroy();
-
-    addLog(log, `TCP 에러. ${error.message}`);
-    btn.innerHTML = "접속";
-  });
-
-  socket.connect({ host: host.value, port: port.value });
-};
-
-const closeConnection = parameters => {
-  const { btn, log } = parameters;
-  let { socket } = parameters;
-
-  socket.destroy();
-
-  console.log("closeConnection");
-
-  addLog(log, "TCP 접속이 종료되었습니다");
-
-  btn.innerHTML = "접속";
-};
-
-document.getElementById("btnAddSession").addEventListener("click", makeSession);
-
-makeSession();
+document.getElementById("btnAddModbusRtuMasterSession").addEventListener("click", makeRtuSession);

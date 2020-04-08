@@ -1,0 +1,32 @@
+<template class="add-template">
+  <div style="height: 50px; display: flex; margin: 5px;">
+    <button id="btnAddModbusAsciiSession">Modbus/ASCII SLAVE 추가</button>
+  </div>
+</template>
+<template class="ascii-session-template">
+  <div class="container">
+    <div class="header">
+      Modbus/ASCII 접속 정보
+    </div>
+    <div class="body">
+      <div class="row">
+        <div class="title">COM 포트</div>
+        <div id="serialPortList"></div>
+        <button id="btnConnectSerialPort" style="margin-left: 10px; width: 150px;">열기</button>
+      </div>
+    </div>
+    <div class="header">
+      로그
+    </div>
+    <div class="body">
+      <div class="row">
+        <div class="container" style="min-width: 400px;">
+          <pre id="log"></pre>
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnClearLog">삭제</button>
+      </div>
+    </div>
+  </div>
+</template>

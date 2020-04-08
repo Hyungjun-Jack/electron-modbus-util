@@ -1,0 +1,36 @@
+<template class="add-template">
+  <div style="height: 50px; display: flex; margin: 5px;">
+    <button id="btnAddModbusTcpSlaveSession">Modbus/TCP SLAVE 추가</button>
+  </div>
+</template>
+<template class="session-template">
+  <div class="container">
+    <div class="header">
+      Modbus/TCP SLAVE 접속 정보
+    </div>
+    <div class="body">
+      <div class="row">
+        <div class="title">포트번호</div>
+        <div>
+          <input id="localPortNubmer" value="502" />
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnConnect">접속</button>
+      </div>
+    </div>
+    <div class="header">
+      로그
+    </div>
+    <div class="body">
+      <div class="row">
+        <div class="container" style="min-width: 400px;">
+          <pre id="log"></pre>
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnClearLog">삭제</button>
+      </div>
+    </div>
+  </div>
+</template>
