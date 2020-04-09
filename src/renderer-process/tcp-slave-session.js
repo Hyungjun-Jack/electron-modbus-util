@@ -9,7 +9,7 @@ const hexOption = { divide: "|", headSep: "|" };
 const link = document.querySelector("#import-tcp-slave-session");
 let template = link.import.querySelector(".add-template");
 let clone = document.importNode(template.content, true);
-document.querySelector(".make-session").appendChild(clone);
+document.querySelector(".make-tcp-session").appendChild(clone);
 
 const makeSession = () => {
   let template = link.import.querySelector(".session-template");
@@ -42,6 +42,15 @@ const makeSession = () => {
     connect(param);
   });
 
+  clone.getElementById("btnDeleteModbusTcpSlaveSession").addEventListener("click", (event) => {
+    const temp = event.currentTarget.parentNode.parentNode.parentNode;
+
+    if (document.querySelector(".modbus-tcp-sessions").contains(temp)) {
+      closeConnection(param);
+      document.querySelector(".modbus-tcp-sessions").removeChild(temp);
+    }
+  });
+
   document.querySelector(".modbus-tcp-sessions").appendChild(clone);
 };
 
@@ -65,8 +74,6 @@ const connect = (parameters) => {
 };
 
 const makeConnection = (parameters) => {
-  console.log("makeConnection", parameters);
-
   const { log, host, localPortNumber, btn } = parameters;
   let { serverSocket, clientSocket, modbus } = parameters;
 
@@ -90,34 +97,33 @@ const makeConnection = (parameters) => {
 
   //------------------------------------------------------
   parameters.modbus.on("postReadCoils", (request, cb) => {
-    console.log(request);
-    addLog(log, request.name);
+    addLog(log, `${request.name} UNIT ID ${request.unitId}`);
   });
   parameters.modbus.on("postReadDiscreteInputs", (request, cb) => {
-    addLog(log, request.name);
+    addLog(log, `${request.name} UNIT ID ${request.unitId}`);
   });
   parameters.modbus.on("postReadHoldingRegisters", (request, cb) => {
-    addLog(log, request.name);
+    addLog(log, `${request.name} UNIT ID ${request.unitId}`);
   });
   parameters.modbus.on("postReadInputRegisters", (request, cb) => {
-    addLog(log, request.name);
+    addLog(log, `${request.name} UNIT ID ${request.unitId}`);
   });
   parameters.modbus.on("postWriteSingleCoil", (request, cb) => {
-    addLog(log, request.name);
+    addLog(log, `${request.name} UNIT ID ${request.unitId}`);
   });
   parameters.modbus.on("postWriteSingleRegister", (request, cb) => {
     if (!(request instanceof Buffer)) {
-      addLog(log, request.name);
+      addLog(log, `${request.name} UNIT ID ${request.unitId}`);
     }
   });
   parameters.modbus.on("postWriteMultipleCoils", (request, cb) => {
     if (!(request instanceof Buffer)) {
-      addLog(log, request.name);
+      addLog(log, `${request.name} UNIT ID ${request.unitId}`);
     }
   });
   parameters.modbus.on("postWriteMultipleRegisters", (request, cb) => {
     if (!(request instanceof Buffer)) {
-      addLog(log, request.name);
+      addLog(log, `${request.name} UNIT ID ${request.unitId}`);
     }
   });
   //------------------------------------------------------
@@ -140,7 +146,6 @@ const makeConnection = (parameters) => {
     parameters.clientSocket = socket;
     const { remoteAddress, remotePort } = socket;
 
-    console.log("connection", remoteAddress, remotePort);
     addLog(log, `접속완료. ${remoteAddress}:${remotePort}`);
 
     socket.on("end", () => {
@@ -167,8 +172,6 @@ const closeConnection = (parameters) => {
   if (serverSocket) {
     serverSocket.close();
   }
-
-  console.log("closeConnection");
 };
 
 document.getElementById("btnAddModbusTcpSlaveSession").addEventListener("click", makeSession);

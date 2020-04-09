@@ -1,25 +1,42 @@
 <template class="add-template">
-  <div style="height: 50px; display: flex; margin: 5px;">
+  <div style="height: 30px; display: flex; margin: 5px;">
     <button id="btnAddModbusRtuSlaveSession">Modbus/RTU SLAVE 추가</button>
   </div>
 </template>
 <template class="rtu-session-template">
   <div class="container">
     <div class="header">
-      Modbus/RTU SLAVE 접속 정보
+      <div>
+        Modbus/RTU SLAVE 접속 정보
+      </div>
+      <div>
+        <button id="btnDeleteModbusRtuSlaveSession" style="width: 26px; height: 26px; margin: 0px; padding: 0px; border: 0px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z" />
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="body">
       <div class="row">
         <div class="title">COM 포트</div>
         <div id="serialPortList"></div>
-        <button id="btnConnectSerialPort" style="margin-left: 10px; width: 150px;">열기</button>
       </div>
-      <div class="header">
-        로그
+      <div class="row">
+        <button id="btnConnectSerialPort">열기</button>
+      </div>
+    </div>
+    <div class="header">
+      로그
+    </div>
+    <div class="body">
+      <div class="row">
+        <div class="container" style="min-width: 400px;">
+          <pre id="log"></pre>
+        </div>
+      </div>
+      <div class="row">
         <button id="btnClearLog">삭제</button>
-      </div>
-      <div class="container" style="min-width: 400px;">
-        <pre id="log"></pre>
       </div>
     </div>
   </div>

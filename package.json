@@ -1,7 +1,7 @@
 {
   "name": "modbus-tcp-app",
   "productName": "modbus-tcp-app",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Modbus/TCP 통신 테스트 프로그램",
   "main": "src/index.js",
   "scripts": {
@@ -11,7 +11,8 @@
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
     "rebuild": "electron-rebuild -f -w serialport",
-    "rebuild:modbus-stream": "electron-rebuild -f -w modbus-stream"
+    "rebuild:modbus-stream": "electron-rebuild -f -w modbus-stream",
+    "build:win": "electron-builder"
   },
   "keywords": [],
   "author": {
@@ -46,6 +47,27 @@
       ]
     }
   },
+  "build": {
+    "appId": "com.sollae.modbus-util",
+    "productName": "modbus-util",
+    "copyright": "2020 Sollae Systems Co.,Ltd.",
+    "asar": true,
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "menuCategory": "SollaeSystems",
+      "shortcutName": "Modbus 테스트 프로그램"
+    },
+    "nsisWeb": {
+      "oneClick": true,
+      "menuCategory": "SollaeSystems",
+      "shortcutName": "Modbus 테스트 프로그램"
+    }
+  },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
     "hexer": "^1.5.0",
@@ -60,6 +82,7 @@
     "@electron-forge/maker-squirrel": "6.0.0-beta.50",
     "@electron-forge/maker-zip": "6.0.0-beta.50",
     "electron": "8.1.1",
+    "electron-builder": "^22.4.1",
     "electron-rebuild": "^1.10.1"
   }
 }

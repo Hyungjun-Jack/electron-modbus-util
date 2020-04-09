@@ -8,7 +8,7 @@ const { addLog, makeSerialPortSelect } = require("./common");
 const link = document.querySelector("#import-rtu-slave-session");
 let template = link.import.querySelector(".add-template");
 let clone = document.importNode(template.content, true);
-document.querySelector(".make-session").appendChild(clone);
+document.querySelector(".make-rtu-session").appendChild(clone);
 
 const makeRtuSession = () => {
   let template = link.import.querySelector(".rtu-session-template");
@@ -41,6 +41,24 @@ const makeRtuSession = () => {
     log.innerHTML = "";
   });
 
+  clone.getElementById("btnDeleteModbusRtuSlaveSession").addEventListener("click", (event) => {
+    const temp = event.currentTarget.parentNode.parentNode.parentNode;
+
+    if (document.querySelector(".modbus-rtu-ascii-sessions").contains(temp)) {
+      if (param.btn.innerHTML === "닫기") {
+        param.serialPort.close((err) => {
+          if (err) {
+            addLog(log, err.message);
+          }
+          modbusAscii = null;
+          btn.innerHTML = "열기";
+          addLog(log, `${path} 닫기 완료`);
+        });
+      }
+      document.querySelector(".modbus-rtu-ascii-sessions").removeChild(temp);
+    }
+  });
+
   document.querySelector(".modbus-rtu-ascii-sessions").appendChild(clone);
 };
 
@@ -54,7 +72,7 @@ const openSerialPort = (parameters) => {
   const path = serialPortSelect.value;
 
   const modbusRtuLog = (request) => {
-    addLog(log, request.name);
+    addLog(log, `${request.name} SLAVE ADDRESS ${request.address}`);
   };
 
   const openPath = (path, parameters) => {

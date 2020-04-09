@@ -8,9 +8,17 @@
     <link rel="import" id="import-rtu-slave-session" href="template/rtu-slave-session.html" />
     <link rel="import" id="import-rtu-master-session" href="template/rtu-master-session.html" />
     <link rel="import" id="import-ascii-slave-session" href="template/ascii-slave-session.html" />
+    <link rel="import" id="import-ascii-master-session" href="template/ascii-master-session.html" />
   </head>
   <body>
-    <div class="make-session sticky" style="display: flex; width: 100vw; margin-bottom: 10px;"></div>
+    <div style="display: flex;">
+      <div class="make-tcp-session sticky" style="display: flex; flex-wrap: wrap; width: 230px; margin-bottom: 10px;"></div>
+      <div class="make-rtu-session sticky" style="display: flex; flex-wrap: wrap; width: 230px; margin-bottom: 10px;"></div>
+      <div class="make-ascii-session sticky" style="display: flex; flex-wrap: wrap; width: 230px; margin-bottom: 10px;"></div>
+      <div class="clear-session sticky" style="display: flex; height: 30px; margin-bottom: 10px; margin: 5px;">
+        <button id="btnClear">초기화</button>
+      </div>
+    </div>
     <div class="modbus-tcp-sessions" style="display: flex; flex-wrap: wrap; width: 100vw;"></div>
     <div class="modbus-rtu-ascii-sessions" style="display: flex; flex-wrap: wrap; width: 100vw;"></div>
   </body>
@@ -46,8 +54,9 @@
 
     require("./renderer-process/tcp-master-session.js");
     require("./renderer-process/tcp-slave-session.js");
-    require("./renderer-process/rtu-slave-session.js");
     require("./renderer-process/rtu-master-session.js");
+    require("./renderer-process/rtu-slave-session.js");
+    require("./renderer-process/ascii-master-session.js");
     require("./renderer-process/ascii-slave-session.js");
     // const connect = () => {
     //   const title = document.getElementById("btnConnect").innerHTML;

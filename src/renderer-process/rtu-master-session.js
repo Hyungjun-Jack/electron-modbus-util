@@ -9,7 +9,7 @@ const { addLog, makeSerialPortSelect } = require("./common");
 const link = document.querySelector("#import-rtu-master-session");
 let template = link.import.querySelector(".add-template");
 let clone = document.importNode(template.content, true);
-document.querySelector(".make-session").appendChild(clone);
+document.querySelector(".make-rtu-session").appendChild(clone);
 
 const makeRtuSession = () => {
   let template = link.import.querySelector(".rtu-session-template");
@@ -77,14 +77,16 @@ const makeRtuSession = () => {
         modbusRtu
           .readCoils(startAddress.value, quantity.value)
           .then((resp, req) => {
-            // console.log(resp, req);
+            console.log(resp, req);
             const {
               response: {
+                address,
                 body: { valuesAsArray, valuesAsBuffer },
               },
             } = resp;
 
             let test = valuesAsArray.map((value, index) => `비트${index}: ${value}\r\n`).join("");
+            addLog(log, `readCoils SLAVE ADDRESS ${address}`);
             addLog(log, "\r\n" + test);
             addLog(log, "\r\n" + hex(valuesAsBuffer, hexOption));
           })
@@ -100,11 +102,13 @@ const makeRtuSession = () => {
 
             const {
               response: {
+                address,
                 body: { valuesAsArray, valuesAsBuffer },
               },
             } = resp;
 
             let test = valuesAsArray.map((value, index) => `비트${index}: ${value}\r\n`).join("");
+            addLog(log, `readDiscreteInputs SLAVE ADDRESS ${address}`);
             addLog(log, "\r\n" + test);
             addLog(log, "\r\n" + hex(valuesAsBuffer, hexOption));
           })
@@ -119,9 +123,12 @@ const makeRtuSession = () => {
             console.log(resp);
             const {
               response: {
+                address,
                 body: { valuesAsArray, valuesAsBuffer },
               },
             } = resp;
+
+            addLog(log, `readHoldingRegisters SLAVE ADDRESS ${address}`);
 
             let test = valuesAsArray.map((value, index) => `레지스터${index}: ${value}\r\n`).join("");
             addLog(log, "\r\n" + test);
@@ -148,11 +155,14 @@ const makeRtuSession = () => {
             console.log(resp);
             const {
               response: {
+                address,
                 body: { valuesAsArray, valuesAsBuffer },
               },
             } = resp;
             console.log(valuesAsArray);
             console.log(hex(valuesAsBuffer, hexOption));
+
+            addLog(log, `readInputRegisters SLAVE ADDRESS ${address}`);
 
             let test = valuesAsArray.map((value, index) => `레지스터${index}: ${value}\r\n`).join("");
             addLog(log, "\r\n" + test);
@@ -178,6 +188,13 @@ const makeRtuSession = () => {
           .writeSingleCoil(startAddress.value, valueCoil.value === "1" ? true : false)
           .then((resp) => {
             console.log(resp);
+            const {
+              response: {
+                address,
+                body: { valuesAsArray, valuesAsBuffer },
+              },
+            } = resp;
+            addLog(log, `writeSingleCoil SLAVE ADDRESS ${address}`);
             addLog(log, "쿼리 전송 성공");
           })
           .catch((err) => {
@@ -195,6 +212,13 @@ const makeRtuSession = () => {
           .writeSingleRegister(startAddress.value, buffer.readUInt16BE(0))
           .then((resp) => {
             console.log(resp);
+            const {
+              response: {
+                address,
+                body: { valuesAsArray, valuesAsBuffer },
+              },
+            } = resp;
+            addLog(log, `writeSingleRegister SLAVE ADDRESS ${address}`);
             addLog(log, "쿼리 전송 성공");
           })
           .catch((err) => {
@@ -223,6 +247,13 @@ const makeRtuSession = () => {
           .writeMultipleCoils(startAddress.value, buffer, _quantity)
           .then((resp) => {
             console.log(resp);
+            const {
+              response: {
+                address,
+                body: { valuesAsArray, valuesAsBuffer },
+              },
+            } = resp;
+            addLog(log, `writeMultipleCoils SLAVE ADDRESS ${address}`);
             addLog(log, "쿼리 전송 성공");
           })
           .catch((err) => {
@@ -251,13 +282,38 @@ const makeRtuSession = () => {
         modbusRtu
           .writeMultipleRegisters(startAddress.value, buffer)
           .then((resp) => {
+            const {
+              response: {
+                address,
+                body: { valuesAsArray, valuesAsBuffer },
+              },
+            } = resp;
             console.log(resp);
+            addLog(log, `writeMultipleRegisters SLAVE ADDRESS ${address}`);
             addLog(log, "쿼리 전송 성공");
           })
           .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
           });
         break;
+    }
+  });
+
+  clone.getElementById("btnDeleteModbusRtuMasterSession").addEventListener("click", (event) => {
+    const temp = event.currentTarget.parentNode.parentNode.parentNode;
+
+    if (document.querySelector(".modbus-rtu-ascii-sessions").contains(temp)) {
+      if (param.btn.innerHTML === "닫기") {
+        param.serialPort.close((err) => {
+          if (err) {
+            addLog(log, err.message);
+          }
+          modbusAscii = null;
+          btn.innerHTML = "열기";
+          addLog(log, `${path} 닫기 완료`);
+        });
+      }
+      document.querySelector(".modbus-rtu-ascii-sessions").removeChild(temp);
     }
   });
 

@@ -6,15 +6,16 @@ if (require("electron-squirrel-startup")) {
   // eslint-disable-line global-require
   app.quit();
 }
-
+let mainWindow;
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 1400,
+  mainWindow = new BrowserWindow({
+    width: 920,
+    height: 1100,
     title: description,
     darkTheme: true,
-    webPreferences: { nodeIntegration: true }
+    backgroundColor: "#eeeeee",
+    webPreferences: { nodeIntegration: true },
   });
 
   // and load the index.html of the app.
@@ -50,4 +51,9 @@ app.on("activate", () => {
 // code. You can also put them in separate files and import them here.
 ipcMain.on("open-error-dialog", (event, msg) => {
   dialog.showErrorBox("", msg);
+});
+
+ipcMain.on("reload", (event, msg) => {
+  console.log("WHARERAE");
+  mainWindow.webContents.reload();
 });

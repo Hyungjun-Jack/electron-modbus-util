@@ -9,7 +9,7 @@ const hexOption = { divide: "|", headSep: "|" };
 const link = document.querySelector("#import-tcp-master-session");
 let template = link.import.querySelector(".add-template");
 let clone = document.importNode(template.content, true);
-document.querySelector(".make-session").appendChild(clone);
+document.querySelector(".make-tcp-session").appendChild(clone);
 
 const makeSession = () => {
   let template = link.import.querySelector(".session-template");
@@ -18,6 +18,7 @@ const makeSession = () => {
 
   const host = clone.getElementById("deviceAddress");
   const port = clone.getElementById("devicePortNubmer");
+  const unitId = clone.getElementById("unitId");
   const log = clone.getElementById("log");
   log.isScrollBottom = true;
   log.addEventListener("scroll", (event) => {
@@ -45,7 +46,7 @@ const makeSession = () => {
   const value = clone.getElementById("value");
   const valueCoil = clone.getElementById("valueCoil");
 
-  const param = { btn, host, port, log, socket, modbus, query: { fc, startAddress, quantity, quantityTitle, value, valueCoil } };
+  const param = { btn, host, port, unitId, log, socket, modbus, query: { fc, startAddress, quantity, quantityTitle, value, valueCoil } };
 
   fc.addEventListener("change", (event) => {
     if (fc.selectedIndex === 4 || fc.selectedIndex === 8) {
@@ -95,6 +96,7 @@ const makeSession = () => {
               },
             } = resp;
 
+            addLog(log, `readCoils UNIT ID ${resp.response.unitId}`);
             let test = valuesAsArray.map((value, index) => `비트${index}: ${value}\r\n`).join("");
             addLog(log, "\r\n" + test);
             addLog(log, "\r\n" + hex(valuesAsBuffer, hexOption));
@@ -115,6 +117,7 @@ const makeSession = () => {
               },
             } = resp;
 
+            addLog(log, `readDiscreteInputs UNIT ID ${resp.response.unitId}`);
             let test = valuesAsArray.map((value, index) => `비트${index}: ${value}\r\n`).join("");
             addLog(log, "\r\n" + test);
             addLog(log, "\r\n" + hex(valuesAsBuffer, hexOption));
@@ -135,6 +138,7 @@ const makeSession = () => {
               },
             } = resp;
 
+            addLog(log, `readHoldingRegisters UNIT ID ${resp.response.unitId}`);
             let test = valuesAsArray.map((value, index) => `레지스터${index}: ${value}\r\n`).join("");
             addLog(log, "\r\n" + test);
 
@@ -167,6 +171,7 @@ const makeSession = () => {
             console.log(valuesAsArray);
             console.log(hex(valuesAsBuffer, hexOption));
 
+            addLog(log, `readInputRegisters UNIT ID ${resp.response.unitId}`);
             let test = valuesAsArray.map((value, index) => `레지스터${index}: ${value}\r\n`).join("");
             addLog(log, "\r\n" + test);
 
@@ -192,6 +197,7 @@ const makeSession = () => {
           .writeSingleCoil(startAddress.value, valueCoil.value === "1" ? true : false)
           .then((resp) => {
             console.log(resp);
+            addLog(log, `writeSingleCoil UNIT ID ${resp.response.unitId}`);
             addLog(log, "쿼리 전송 성공");
           })
           .catch((err) => {
@@ -210,6 +216,7 @@ const makeSession = () => {
           .writeSingleRegister(startAddress.value, buffer.readUInt16BE(0))
           .then((resp) => {
             console.log(resp);
+            addLog(log, `writeSingleRegister UNIT ID ${resp.response.unitId}`);
             addLog(log, "쿼리 전송 성공");
           })
           .catch((err) => {
@@ -239,6 +246,7 @@ const makeSession = () => {
           .writeMultipleCoils(startAddress.value, buffer, _quantity)
           .then((resp) => {
             console.log(resp);
+            addLog(log, `writeMultipleCoils UNIT ID ${resp.response.unitId}`);
             addLog(log, "쿼리 전송 성공");
           })
           .catch((err) => {
@@ -269,6 +277,7 @@ const makeSession = () => {
           .writeMultipleRegisters(startAddress.value, buffer)
           .then((resp) => {
             console.log(resp);
+            addLog(log, `writeMultipleRegisters UNIT ID ${resp.response.unitId}`);
             addLog(log, "쿼리 전송 성공");
           })
           .catch((err) => {
@@ -294,6 +303,7 @@ const makeSession = () => {
           .writeFc105(startAddress.value, quantity.value, valueCoil.value === "1" ? true : false)
           .then((resp) => {
             console.log(resp);
+            addLog(log, `writeFc105 UNIT ID ${resp.response.unitId}`);
             addLog(log, "쿼리 전송 성공");
           })
           .catch((err) => {
@@ -301,6 +311,15 @@ const makeSession = () => {
             closeConnection(param);
           });
         break;
+    }
+  });
+
+  clone.getElementById("btnDeleteModbusTcpMasterSession").addEventListener("click", (event) => {
+    const temp = event.currentTarget.parentNode.parentNode.parentNode;
+
+    if (document.querySelector(".modbus-tcp-sessions").contains(temp)) {
+      closeConnection(param);
+      document.querySelector(".modbus-tcp-sessions").removeChild(temp);
     }
   });
 
@@ -329,7 +348,7 @@ const connect = (parameters) => {
 const makeConnection = (parameters) => {
   console.log("makeConnection", parameters);
 
-  const { log, host, port, btn } = parameters;
+  const { log, host, port, unitId, btn } = parameters;
   let { socket, modbus } = parameters;
 
   addLog(log, "TCP 접속 시도 중...");
@@ -345,7 +364,8 @@ const makeConnection = (parameters) => {
 
   socket = new net.Socket();
   parameters.socket = socket;
-  parameters.modbus = new Modbus.client.TCP(socket, 1);
+  parameters.modbus = new Modbus.client.TCP(socket, parseInt(unitId.value, 10));
+  // parameters.modbus = new Modbus.client.TCP(socket, 1);
 
   socket.on("connect", (socket) => {
     console.log("connect");
@@ -376,7 +396,9 @@ const closeConnection = (parameters) => {
   const { btn, log } = parameters;
   let { socket } = parameters;
 
-  socket.destroy();
+  if (socket) {
+    socket.destroy();
+  }
 
   console.log("closeConnection");
 

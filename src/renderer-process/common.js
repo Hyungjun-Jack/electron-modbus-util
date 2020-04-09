@@ -1,3 +1,5 @@
+const { ipcRenderer } = require("electron");
+
 const addLog = (div, message) => {
   // console.log("addLog", message);
   const date = new Date();
@@ -25,5 +27,11 @@ const makeSerialPortSelect = (container) => {
 
   return select;
 };
+
+const btnClear = document.getElementById("btnClear");
+console.log(btnClear);
+btnClear.addEventListener("click", () => {
+  ipcRenderer.send("reload");
+});
 
 module.exports = { addLog, makeSerialPortSelect };
