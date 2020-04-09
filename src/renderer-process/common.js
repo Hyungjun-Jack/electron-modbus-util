@@ -28,10 +28,10 @@ const makeSerialPortSelect = (container) => {
   return select;
 };
 
-const btnClear = document.getElementById("btnClear");
-console.log(btnClear);
-btnClear.addEventListener("click", () => {
-  ipcRenderer.send("reload");
-});
+// const btnClear = document.getElementById("btnClear");
+// console.log(btnClear);
+// btnClear.addEventListener("click", () => {
+//   ipcRenderer.send("reload");
+// });
 
 module.exports = { addLog, makeSerialPortSelect };
