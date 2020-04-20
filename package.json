@@ -1,7 +1,7 @@
 {
   "name": "modbus-tcp-app",
   "productName": "modbus-tcp-app",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Modbus 통신 테스트 프로그램",
   "main": "src/index.js",
   "scripts": {
@@ -11,6 +11,7 @@
     "rebuild:modbus-stream-serialport": "electron-rebuild -f -w modbus-stream/node_modules/serialport",
     "build:win": "electron-builder"
   },
+  "repository": "https://github.com/Hyungjun-Jack/electron-modbus-util",
   "keywords": [],
   "author": {
     "name": "Hyungjun Kim",
@@ -22,6 +23,11 @@
     "productName": "modbus-util",
     "copyright": "2020 Sollae Systems Co.,Ltd.",
     "asar": true,
+    "publish": {
+      "provider": "github",
+      "owner": "Hyungjun-Jack",
+      "repo": "electron-modbus-util"
+    },
     "win": {
       "target": [
         "nsis"
@@ -39,7 +45,8 @@
     }
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
+    "electron-log": "^4.1.1",
+    "electron-updater": "^4.2.5",
     "hexer": "^1.5.0",
     "jsmodbus": "^3.1.6",
     "modbus-stream": "^0.44.0",
@@ -47,7 +54,7 @@
   },
   "devDependencies": {
     "electron": "8.1.1",
-    "electron-builder": "^22.4.1",
+    "electron-builder": "^22.5.1",
     "electron-rebuild": "^1.10.1"
   }
 }
