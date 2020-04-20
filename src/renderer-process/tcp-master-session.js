@@ -103,6 +103,7 @@ const makeSession = () => {
           })
           .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
+            // closeConnection(param);
           });
         break;
       case 1: //READ DISCRETE INPUTS (FC 02)
@@ -124,7 +125,7 @@ const makeSession = () => {
           })
           .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
-            closeConnection(param);
+            // closeConnection(param);
           });
         break;
       case 2: //READ HOLDING REGISTERS (FC 03)
@@ -155,7 +156,7 @@ const makeSession = () => {
           })
           .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
-            closeConnection(param);
+            // closeConnection(param);
           });
         break;
       case 3: //READ INPUT REGISTERS (FC 04)
@@ -189,7 +190,7 @@ const makeSession = () => {
           })
           .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
-            closeConnection(param);
+            // closeConnection(param);
           });
         break;
       case 4: //WRITE SINGLE COIL (FC 05)
@@ -202,7 +203,7 @@ const makeSession = () => {
           })
           .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
-            closeConnection(param);
+            // closeConnection(param);
           });
         break;
       case 5: //WRITE SINGLE REGISTER (FC 06)
@@ -221,7 +222,7 @@ const makeSession = () => {
           })
           .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
-            closeConnection(param);
+            // closeConnection(param);
           });
         break;
       case 6: //WRITE MULTIPLE COILS (FC 15)
@@ -251,7 +252,7 @@ const makeSession = () => {
           })
           .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
-            closeConnection(param);
+            // closeConnection(param);
           });
         break;
       case 7: //WRITE MULTIPLE REGISTERS (FC 16)
@@ -282,7 +283,7 @@ const makeSession = () => {
           })
           .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
-            closeConnection(param);
+            // closeConnection(param);
           });
         break;
       case 8: //PULSE (FC 105)
@@ -308,7 +309,7 @@ const makeSession = () => {
           })
           .catch((err) => {
             addLog(log, err.response ? err.response.body.message : err.message);
-            closeConnection(param);
+            // closeConnection(param);
           });
         break;
     }
