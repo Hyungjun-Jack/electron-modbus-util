@@ -1,14 +1,13 @@
 {
   "name": "modbus-tcp-app",
   "productName": "modbus-tcp-app",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Modbus 통신 테스트 프로그램",
   "main": "src/index.js",
   "scripts": {
     "lint": "echo \"No linting configured\"",
     "rebuild": "electron-rebuild -f -w serialport",
     "rebuild:modbus-stream": "electron-rebuild -f -w modbus-stream",
-    "rebuild:modbus-stream-serialport": "electron-rebuild -f -w modbus-stream/node_modules/serialport",
     "build:win": "electron-builder"
   },
   "repository": "https://github.com/Hyungjun-Jack/electron-modbus-util",
@@ -23,11 +22,6 @@
     "productName": "modbus-util",
     "copyright": "2020 Sollae Systems Co.,Ltd.",
     "asar": true,
-    "publish": {
-      "provider": "github",
-      "owner": "Hyungjun-Jack",
-      "repo": "electron-modbus-util"
-    },
     "win": {
       "target": [
         "nsis"
