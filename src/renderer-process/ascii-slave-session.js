@@ -18,6 +18,7 @@ const makeRtuSession = () => {
 
   const serialPortDiv = clone.getElementById("serialPortList");
   const serialPortSelect = makeSerialPortSelect(serialPortDiv);
+  const slaveAddress = clone.getElementById("slaveAddress");
 
   const btn = clone.getElementById("btnConnectSerialPort");
 
@@ -32,7 +33,7 @@ const makeRtuSession = () => {
   });
   const btnClearLog = clone.getElementById("btnClearLog");
 
-  const param = { btn, serialPortSelect, serialPort: null, log, modbusAscii: null };
+  const param = { btn, serialPortSelect, slaveAddress, serialPort: null, log, modbusAscii: null };
 
   clone.getElementById("btnConnectSerialPort").addEventListener("click", (event) => {
     openSerialPort(param);
@@ -65,7 +66,7 @@ const makeRtuSession = () => {
 
 const openSerialPort = (parameters) => {
   // console.log("connect", hostElement.value, portElement.value);
-  const { btn, serialPortSelect, log } = parameters;
+  const { btn, serialPortSelect, slaveAddress, log } = parameters;
   let { modbusAscii } = parameters;
 
   const title = btn.innerHTML;
@@ -83,78 +84,124 @@ const openSerialPort = (parameters) => {
         // console.log(connection._events);
         connection.on("read-coils", (req, reply) => {
           console.log(req, reply);
+
           const {
             slaveId,
             request: { code, address, quantity },
           } = req;
-          addLog(log, `${code} SLAVE ID ${slaveId}`);
-          const data = Array(quantity).fill(0);
-          // reply(new Error(1), data);
-          reply(null, data);
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            const data = Array(quantity).fill(0);
+            // reply(new Error(1), data);
+            reply(null, data);
+          }
         });
 
         connection.on("read-discrete-inputs", (req, reply) => {
           console.log(req, reply);
 
           const {
+            slaveId,
             request: { code, address, quantity },
           } = req;
-          addLog(log, code);
-          const data = Array(quantity).fill(0);
-          // reply(new Error(1), data);
-          reply(null, data);
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            const data = Array(quantity).fill(0);
+            // reply(new Error(1), data);
+            reply(null, data);
+          }
         });
         connection.on("read-holding-registers", (req, reply) => {
           console.log(req, reply);
+
           const {
+            slaveId,
             request: { code, address, quantity },
           } = req;
-          addLog(log, code);
-          const data = Buffer.alloc(quantity * 2);
-          // reply(new Error(1), data);
-          reply(null, data);
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            const data = Buffer.alloc(quantity * 2);
+            // reply(new Error(1), data);
+            reply(null, data);
+          }
         });
         connection.on("read-input-registers", (req, reply) => {
           console.log(req, reply);
+
           const {
+            slaveId,
             request: { code, address, quantity },
           } = req;
-          addLog(log, code);
-          const data = Buffer.alloc(quantity * 2);
-          // reply(new Error(1), data);
-          reply(null, data);
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            const data = Buffer.alloc(quantity * 2);
+            // reply(new Error(1), data);
+            reply(null, data);
+          }
         });
         connection.on("write-single-coil", (req, reply) => {
           console.log(req, reply);
+
           const {
+            slaveId,
             request: { code, address, quantity },
           } = req;
-          addLog(log, code);
-          reply(null, null);
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            reply(null, null);
+          }
         });
         connection.on("write-single-register", (req, reply) => {
           console.log(req, reply);
+
           const {
+            slaveId,
             request: { code, address, value },
           } = req;
-          addLog(log, code);
-          reply(null, address, value);
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            reply(null, address, value);
+          }
         });
         connection.on("write-multiple-coils", (req, reply) => {
           console.log(req, reply);
+
           const {
+            slaveId,
             request: { code, address, quantity },
           } = req;
-          addLog(log, code);
-          reply(null, null);
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            reply(null, null);
+          }
         });
         connection.on("write-multiple-registers", (req, reply) => {
           console.log(req, reply);
+
           const {
+            slaveId,
             request: { code, address, value },
           } = req;
-          addLog(log, code);
-          reply(null, address, value);
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            reply(null, address, value);
+          }
         });
       }
     });

@@ -1,5 +1,5 @@
 const { ipcRenderer } = require("electron");
-const Modbus = require("jsmodbus");
+const Modbus = require("modbus-stream");
 const hex = require("hexer");
 const hexOption = { divide: "|", headSep: "|" };
 
@@ -17,6 +17,7 @@ const makeRtuSession = () => {
 
   const serialPortDiv = clone.getElementById("serialPortList");
   const serialPortSelect = makeSerialPortSelect(serialPortDiv);
+  const slaveAddress = clone.getElementById("slaveAddress");
 
   const btn = clone.getElementById("btnConnectSerialPort");
 
@@ -31,7 +32,7 @@ const makeRtuSession = () => {
   });
   const btnClearLog = clone.getElementById("btnClearLog");
 
-  const param = { btn, serialPortSelect, serialPort: null, log, modbusRtu: null };
+  const param = { btn, serialPortSelect, slaveAddress, serialPort: null, log, modbusRtu: null };
 
   clone.getElementById("btnConnectSerialPort").addEventListener("click", (event) => {
     openSerialPort(param);
@@ -46,11 +47,11 @@ const makeRtuSession = () => {
 
     if (document.querySelector(".modbus-rtu-ascii-sessions").contains(temp)) {
       if (param.btn.innerHTML === "닫기") {
-        param.serialPort.close((err) => {
+        param.modbusRtu.close((err) => {
           if (err) {
             addLog(log, err.message);
           }
-          modbusAscii = null;
+          modbusRtu = null;
           btn.innerHTML = "열기";
           addLog(log, `${path} 닫기 완료`);
         });
@@ -64,67 +65,158 @@ const makeRtuSession = () => {
 
 const openSerialPort = (parameters) => {
   // console.log("connect", hostElement.value, portElement.value);
-  const { btn, serialPortSelect, log } = parameters;
-  let { serialPort, modbusRtu } = parameters;
+  const { btn, serialPortSelect, slaveAddress, log } = parameters;
+  let { modbusRtu } = parameters;
 
   const title = btn.innerHTML;
 
   const path = serialPortSelect.value;
 
-  const modbusRtuLog = (request) => {
-    addLog(log, `${request.name} SLAVE ADDRESS ${request.address}`);
-  };
-
   const openPath = (path, parameters) => {
-    parameters.serialPort = new SerialPort(path, { baudRate: 9600, dataBits: 8, stopBits: 1, parity: "none" }, (err) => {
-      if (!err) {
+    Modbus.serial.connect(path, { baudRate: 9600, dataBits: 8, stopBits: 1, parity: "none", debug: "automation-123" }, (err, connection) => {
+      if (err) {
+        addLog(log, err.message);
+      } else {
         btn.innerHTML = "닫기";
         addLog(log, `${path} 열기 완료`);
         // parameters.modbusRtu = new Modbus.server.RTU(parameters.serialPort, { coils: Buffer.alloc(1) });
-        parameters.modbusRtu = new Modbus.server.RTU(parameters.serialPort);
+        parameters.modbusRtu = connection;
 
-        parameters.modbusRtu.on("postReadCoils", (request, cb) => {
-          console.log(request);
-          modbusRtuLog(request);
+        connection.on("read-coils", (req, reply) => {
+          console.log(req, reply);
+
+          const {
+            slaveId,
+            request: { code, address, quantity },
+          } = req;
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            const data = Array(quantity).fill(0);
+            // reply(new Error(1), data);
+            reply(null, data);
+          }
         });
-        parameters.modbusRtu.on("postReadDiscreteInputs", (request, cb) => {
-          console.log(request);
-          modbusRtuLog(request);
+
+        connection.on("read-discrete-inputs", (req, reply) => {
+          console.log(req, reply);
+
+          const {
+            slaveId,
+            request: { code, address, quantity },
+          } = req;
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            const data = Array(quantity).fill(0);
+            // reply(new Error(1), data);
+            reply(null, data);
+          }
         });
-        parameters.modbusRtu.on("postReadHoldingRegisters", (request, cb) => {
-          console.log(request);
-          modbusRtuLog(request);
+
+        connection.on("read-holding-registers", (req, reply) => {
+          console.log(req, reply);
+
+          const {
+            slaveId,
+            request: { code, address, quantity },
+          } = req;
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            const data = Buffer.alloc(quantity * 2);
+            // reply(new Error(1), data);
+            reply(null, data);
+          }
         });
-        parameters.modbusRtu.on("postReadInputRegisters", (request, cb) => {
-          console.log(request);
-          modbusRtuLog(request);
+
+        connection.on("read-input-registers", (req, reply) => {
+          console.log(req, reply);
+
+          const {
+            slaveId,
+            request: { code, address, quantity },
+          } = req;
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            const data = Buffer.alloc(quantity * 2);
+            // reply(new Error(1), data);
+            reply(null, data);
+          }
         });
-        parameters.modbusRtu.on("postWriteSingleCoil", (request, cb) => {
-          console.log(request);
-          modbusRtuLog(request);
+
+        connection.on("write-single-coil", (req, reply) => {
+          console.log(req, reply);
+
+          const {
+            slaveId,
+            request: { code, address, quantity },
+          } = req;
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            reply(null, null);
+          }
         });
-        parameters.modbusRtu.on("postWriteSingleRegister", (request, cb) => {
-          console.log(request);
-          modbusRtuLog(request);
+
+        connection.on("write-single-register", (req, reply) => {
+          console.log(req, reply);
+
+          const {
+            slaveId,
+            request: { code, address, value },
+          } = req;
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            reply(null, address, value);
+          }
         });
-        parameters.modbusRtu.on("postWriteMultipleCoils", (request, cb) => {
-          console.log(request);
-          modbusRtuLog(request);
+
+        connection.on("write-multiple-coils", (req, reply) => {
+          console.log(req, reply);
+
+          const {
+            slaveId,
+            request: { code, address, quantity },
+          } = req;
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            reply(null, null);
+          }
         });
-        parameters.modbusRtu.on("postWriteMultipleRegisters", (request, cb) => {
-          console.log(request);
-          modbusRtuLog(request);
+
+        connection.on("write-multiple-registers", (req, reply) => {
+          console.log(req, reply);
+
+          const {
+            slaveId,
+            request: { code, address, value },
+          } = req;
+
+          if (slaveId === parseInt(slaveAddress.value, 10)) {
+            addLog(log, `${code} SLAVE ID ${slaveId}`);
+
+            reply(null, address, value);
+          }
         });
-      } else {
-        addLog(log, err.message);
       }
     });
   };
 
   switch (title) {
     case "열기":
-      if (serialPort) {
-        serialPort.close((err) => {
+      if (modbusRtu) {
+        modbusRtu.close((err) => {
           openPath(path, parameters);
         });
       } else {
@@ -132,7 +224,7 @@ const openSerialPort = (parameters) => {
       }
       break;
     case "닫기":
-      serialPort.close((err) => {
+      modbusRtu.close((err) => {
         if (err) {
           addLog(log, err.message);
         }
