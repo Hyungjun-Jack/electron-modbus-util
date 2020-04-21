@@ -34,4 +34,8 @@ const makeSerialPortSelect = (container) => {
 //   ipcRenderer.send("reload");
 // });
 
+ipcRenderer.on("message", function (event, text) {
+  console.log(text);
+});
+
 module.exports = { addLog, makeSerialPortSelect };

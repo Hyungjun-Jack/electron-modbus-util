@@ -1,7 +1,7 @@
 {
   "name": "modbus-tcp-app",
   "productName": "modbus-tcp-app",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Modbus 통신 테스트 프로그램",
   "main": "src/index.js",
   "scripts": {
@@ -10,7 +10,6 @@
     "rebuild:modbus-stream": "electron-rebuild -f -w modbus-stream",
     "build:win": "electron-builder"
   },
-  "repository": "https://github.com/Hyungjun-Jack/electron-modbus-util",
   "keywords": [],
   "author": {
     "name": "Hyungjun Kim",
@@ -30,7 +29,8 @@
     "nsis": {
       "oneClick": true,
       "menuCategory": "SollaeSystems",
-      "shortcutName": "Modbus 테스트 프로그램"
+      "shortcutName": "Modbus 테스트 프로그램",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "nsisWeb": {
       "oneClick": true,
