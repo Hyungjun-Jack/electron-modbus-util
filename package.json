@@ -1,7 +1,7 @@
 {
   "name": "modbus-tcp-app",
   "productName": "modbus-tcp-app",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Modbus 통신 테스트 프로그램",
   "main": "src/index.js",
   "scripts": {
@@ -10,6 +10,7 @@
     "rebuild:modbus-stream": "electron-rebuild -f -w modbus-stream",
     "build:win": "electron-builder"
   },
+  "repository": "https://github.com/Hyungjun-Jack/electron-modbus-util.git",
   "keywords": [],
   "author": {
     "name": "Hyungjun Kim",
@@ -40,6 +41,7 @@
   },
   "dependencies": {
     "electron-log": "^4.1.1",
+    "electron-progressbar": "^1.2.0",
     "electron-updater": "^4.2.5",
     "hexer": "^1.5.0",
     "jsmodbus": "^3.1.6",

@@ -4,6 +4,7 @@ const { description, version } = require("../package");
 
 const log = require("electron-log");
 const { autoUpdater } = require("electron-updater");
+const ProgressBar = require("electron-progressbar");
 
 //-------------------------------------------------------------------
 // Logging
@@ -13,11 +14,13 @@ const { autoUpdater } = require("electron-updater");
 // This logging setup is not required for auto-updates to work,
 // but it sure makes debugging easier :)
 //-------------------------------------------------------------------
+autoUpdater.autoDownload = false;
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = "info";
 log.info("App starting...");
 
-let mainWindow;
+let mainWindow, progressBar;
+
 const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -33,9 +36,11 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, "index.html"));
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
+
   // createDefaultUpdaetWindow();
   autoUpdater.checkForUpdates();
+  // autoUpdater.checkForUpdatesAndNotify();
 };
 
 //------------------------------------------------------------
@@ -50,6 +55,38 @@ autoUpdater.on("checking-for-update", () => {
 
 autoUpdater.on("update-available", (info) => {
   sendStatusToWindow("Update available.");
+  const option = {
+    type: "question",
+    buttons: ["설치", "취소"],
+    defaultId: 0,
+    title: "electron-updater",
+    message: "업데이트가 있습니다. 업데이트를 설치 하시겠습니까?",
+  };
+  let btnIndex = dialog.showMessageBoxSync(mainWindow, option);
+
+  if (btnIndex === 0) {
+    autoUpdater.downloadUpdate();
+
+    progressBar = new ProgressBar({
+      indeterminate: false,
+      title: "업데이트 다운로드",
+      text: "업데이트를 다운로드 중입니다.",
+      browserWindow: {
+        parent: mainWindow,
+        webPreferences: { nodeIntegration: true },
+      },
+    });
+
+    progressBar
+      .on("completed", () => {
+        sendStatusToWindow("ProgressBar: completed");
+      })
+      .on("aborted", () => {})
+      .on("progress", (value) => {
+        sendStatusToWindow(`ProgressBar: completed(${value})`);
+        progressBar.detail = `${value}% 완료`;
+      });
+  }
 });
 
 autoUpdater.on("update-not-available", (info) => {
@@ -64,23 +101,30 @@ autoUpdater.on("download-progress", (progressObj) => {
   let log_message = "Download speed: " + progressObj.bytesPerSecond;
   log_message = log_message + " - Downloaded " + progressObj.percent + "%";
   log_message = log_message + " (" + progressObj.transferred + "/" + progressObj.total + ")";
+
+  let progressValue = Math.round(progressObj.percent);
+  sendStatusToWindow(`progressValue:${progressValue}`);
+  if (!progressBar.isCompleted()) {
+    progressBar.value = progressValue;
+  }
   sendStatusToWindow(log_message);
 });
 
 autoUpdater.on("update-downloaded", (info) => {
   console.log("Update downloaded");
-  const option = {
-    type: "question",
-    buttons: ["업데이트", "취소"],
-    defaultId: 0,
-    title: "electron-updater",
-    message: "업데이트가 있습니다. 프로그램을 업데이트 하시겠습니까?",
-  };
-  let btnIndex = dialog.showMessageBoxSync(mainWindow, option);
+  // const option = {
+  //   type: "question",
+  //   buttons: ["업데이트", "취소"],
+  //   defaultId: 0,
+  //   title: "electron-updater",
+  //   message: "업데이트가 다운로드되었습니다. 지금 설치하시겠습니까? 취소를 누르면 프로그램 재 시작 시 자동으로 설치됩니다.",
+  // };
+  // let btnIndex = dialog.showMessageBoxSync(mainWindow, option);
 
-  if (btnIndex === 0) {
-    autoUpdater.quitAndInstall();
-  }
+  // if (btnIndex === 0) {
+  //   autoUpdater.quitAndInstall();
+  // }
+  autoUpdater.quitAndInstall();
 });
 //------------------------------------------------------------
 
