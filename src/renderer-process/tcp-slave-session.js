@@ -16,6 +16,9 @@ const makeSession = () => {
   let clone = document.importNode(template.content, true);
 
   const localPortNumber = clone.getElementById("localPortNubmer");
+  const changeUnitId = clone.getElementById("changeUnitId");
+  const changeTransactionId = clone.getElementById("changeTransactionId");
+
   const btn = clone.getElementById("btnConnect");
 
   const log = clone.getElementById("log");
@@ -32,7 +35,7 @@ const makeSession = () => {
   });
   const btnClearLog = clone.getElementById("btnClearLog");
 
-  const param = { localPortNumber, serverSocket: null, clientSocket: null, modbus: null, btn, log };
+  const param = { localPortNumber, changeUnitId, changeTransactionId, serverSocket: null, clientSocket: null, modbus: null, btn, log };
 
   btnClearLog.addEventListener("click", (event) => {
     log.innerHTML = "";
@@ -73,6 +76,8 @@ const connect = (parameters) => {
   }
 };
 
+const holding = Buffer.alloc(10000);
+
 const makeConnection = (parameters) => {
   const { log, host, localPortNumber, btn } = parameters;
   let { serverSocket, clientSocket, modbus } = parameters;
@@ -95,32 +100,57 @@ const makeConnection = (parameters) => {
   parameters.serverSocket = serverSocket;
   parameters.modbus = new Modbus.server.TCP(serverSocket);
 
+  const changeUnitIdTransactionId = (request, cb) => {
+    if (parameters.changeUnitId.checked) {
+      request.unitId += 1;
+    }
+
+    if (parameters.changeTransactionId.checked) {
+      request.id += 1;
+    }
+  };
+
   //------------------------------------------------------
+  parameters.modbus.on("preReadCoils", changeUnitIdTransactionId);
   parameters.modbus.on("postReadCoils", (request, cb) => {
     addLog(log, `${request.name} UNIT ID ${request.unitId}`);
   });
+
+  parameters.modbus.on("preReadDiscreteInputs", changeUnitIdTransactionId);
   parameters.modbus.on("postReadDiscreteInputs", (request, cb) => {
     addLog(log, `${request.name} UNIT ID ${request.unitId}`);
   });
+
+  parameters.modbus.on("preReadHoldingRegisters", changeUnitIdTransactionId);
   parameters.modbus.on("postReadHoldingRegisters", (request, cb) => {
     addLog(log, `${request.name} UNIT ID ${request.unitId}`);
   });
+
+  parameters.modbus.on("preReadInputRegisters", changeUnitIdTransactionId);
   parameters.modbus.on("postReadInputRegisters", (request, cb) => {
     addLog(log, `${request.name} UNIT ID ${request.unitId}`);
   });
+
+  parameters.modbus.on("preWriteSingleCoil", changeUnitIdTransactionId);
   parameters.modbus.on("postWriteSingleCoil", (request, cb) => {
     addLog(log, `${request.name} UNIT ID ${request.unitId}`);
   });
+
+  parameters.modbus.on("preWriteSingleRegister", changeUnitIdTransactionId);
   parameters.modbus.on("postWriteSingleRegister", (request, cb) => {
     if (!(request instanceof Buffer)) {
       addLog(log, `${request.name} UNIT ID ${request.unitId}`);
     }
   });
+
+  parameters.modbus.on("preWriteMultipleCoils", changeUnitIdTransactionId);
   parameters.modbus.on("postWriteMultipleCoils", (request, cb) => {
     if (!(request instanceof Buffer)) {
       addLog(log, `${request.name} UNIT ID ${request.unitId}`);
     }
   });
+
+  parameters.modbus.on("preReadDiscreteInputs", changeUnitIdTransactionId);
   parameters.modbus.on("postWriteMultipleRegisters", (request, cb) => {
     if (!(request instanceof Buffer)) {
       addLog(log, `${request.name} UNIT ID ${request.unitId}`);
