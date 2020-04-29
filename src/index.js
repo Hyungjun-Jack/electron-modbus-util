@@ -25,7 +25,7 @@ const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 920,
-    height: 1100,
+    height: 1180,
     title: `${description} ${version}`,
     darkTheme: true,
     backgroundColor: "#eeeeee",
