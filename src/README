@@ -179,6 +179,15 @@ module.exports = WriteFc105ResponseBody
         return WriteFc105Body.fromBuffer(buffer)
       }
 
+4.1. jsmodbus/src/tcp-request.js
+  -- transaction id, unit id를 조작하기 위해서 임의로 추가.
+  set id (id) {
+    this._id = id
+  }
+
+  set unitId (unitId) {
+    this._unitId = unitId
+  }
 
 5. auto update
   - https://www.electron.build/auto-update

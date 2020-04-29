@@ -19,6 +19,7 @@ const makeRtuSession = () => {
   const serialPortDiv = clone.getElementById("serialPortList");
   const serialPortSelect = makeSerialPortSelect(serialPortDiv);
   const slaveAddress = clone.getElementById("slaveAddress");
+  const changeSlaveId = clone.getElementById("changeSlaveId");
 
   const btn = clone.getElementById("btnConnectSerialPort");
 
@@ -33,7 +34,7 @@ const makeRtuSession = () => {
   });
   const btnClearLog = clone.getElementById("btnClearLog");
 
-  const param = { btn, serialPortSelect, slaveAddress, serialPort: null, log, modbusAscii: null };
+  const param = { btn, serialPortSelect, slaveAddress, changeSlaveId, serialPort: null, log, modbusAscii: null };
 
   clone.getElementById("btnConnectSerialPort").addEventListener("click", (event) => {
     openSerialPort(param);
@@ -54,7 +55,6 @@ const makeRtuSession = () => {
           }
           modbusAscii = null;
           btn.innerHTML = "열기";
-          addLog(log, `${path} 닫기 완료`);
         });
       }
       document.querySelector(".modbus-rtu-ascii-sessions").removeChild(temp);
@@ -82,127 +82,56 @@ const openSerialPort = (parameters) => {
         addLog(log, `${path} 열기 완료`);
         parameters.modbusAscii = connection;
         // console.log(connection._events);
-        connection.on("read-coils", (req, reply) => {
-          console.log(req, reply);
 
-          const {
+        const makeReply = (req, reply) => {
+          // console.log(req, reply);
+          let {
             slaveId,
-            request: { code, address, quantity },
+            request: { code, address, quantity, value },
           } = req;
 
           if (slaveId === parseInt(slaveAddress.value, 10)) {
+            if (changeSlaveId.checked) {
+              slaveId += 1;
+              req.slaveId = slaveId;
+            }
+
             addLog(log, `${code} SLAVE ID ${slaveId}`);
 
-            const data = Array(quantity).fill(0);
+            let data;
+            switch (code) {
+              case "ReadCoils":
+                data = Array(quantity).fill(0);
+                break;
+              case "ReadHoldingRegisters":
+                data = Buffer.alloc(quantity * 2);
+                break;
+              case "ReadInputRegisters":
+                data = Buffer.alloc(quantity * 2);
+                break;
+              case "WriteSingleCoil":
+                break;
+              case "WriteSingleRegister":
+                reply(null, address, value);
+                return;
+              case "WriteMultipleCoils":
+                break;
+              case "WriteMultipleRegisters":
+                reply(null, address, value);
+                return;
+            }
             // reply(new Error(1), data);
             reply(null, data);
           }
-        });
+        };
 
-        connection.on("read-discrete-inputs", (req, reply) => {
-          console.log(req, reply);
-
-          const {
-            slaveId,
-            request: { code, address, quantity },
-          } = req;
-
-          if (slaveId === parseInt(slaveAddress.value, 10)) {
-            addLog(log, `${code} SLAVE ID ${slaveId}`);
-
-            const data = Array(quantity).fill(0);
-            // reply(new Error(1), data);
-            reply(null, data);
-          }
-        });
-        connection.on("read-holding-registers", (req, reply) => {
-          console.log(req, reply);
-
-          const {
-            slaveId,
-            request: { code, address, quantity },
-          } = req;
-
-          if (slaveId === parseInt(slaveAddress.value, 10)) {
-            addLog(log, `${code} SLAVE ID ${slaveId}`);
-
-            const data = Buffer.alloc(quantity * 2);
-            // reply(new Error(1), data);
-            reply(null, data);
-          }
-        });
-        connection.on("read-input-registers", (req, reply) => {
-          console.log(req, reply);
-
-          const {
-            slaveId,
-            request: { code, address, quantity },
-          } = req;
-
-          if (slaveId === parseInt(slaveAddress.value, 10)) {
-            addLog(log, `${code} SLAVE ID ${slaveId}`);
-
-            const data = Buffer.alloc(quantity * 2);
-            // reply(new Error(1), data);
-            reply(null, data);
-          }
-        });
-        connection.on("write-single-coil", (req, reply) => {
-          console.log(req, reply);
-
-          const {
-            slaveId,
-            request: { code, address, quantity },
-          } = req;
-
-          if (slaveId === parseInt(slaveAddress.value, 10)) {
-            addLog(log, `${code} SLAVE ID ${slaveId}`);
-
-            reply(null, null);
-          }
-        });
-        connection.on("write-single-register", (req, reply) => {
-          console.log(req, reply);
-
-          const {
-            slaveId,
-            request: { code, address, value },
-          } = req;
-
-          if (slaveId === parseInt(slaveAddress.value, 10)) {
-            addLog(log, `${code} SLAVE ID ${slaveId}`);
-
-            reply(null, address, value);
-          }
-        });
-        connection.on("write-multiple-coils", (req, reply) => {
-          console.log(req, reply);
-
-          const {
-            slaveId,
-            request: { code, address, quantity },
-          } = req;
-
-          if (slaveId === parseInt(slaveAddress.value, 10)) {
-            addLog(log, `${code} SLAVE ID ${slaveId}`);
-
-            reply(null, null);
-          }
-        });
-        connection.on("write-multiple-registers", (req, reply) => {
-          console.log(req, reply);
-
-          const {
-            slaveId,
-            request: { code, address, value },
-          } = req;
-
-          if (slaveId === parseInt(slaveAddress.value, 10)) {
-            addLog(log, `${code} SLAVE ID ${slaveId}`);
-
-            reply(null, address, value);
-          }
-        });
+        connection.on("read-coils", makeReply);
+        connection.on("read-holding-registers", makeReply);
+        connection.on("read-input-registers", makeReply);
+        connection.on("write-single-coil", makeReply);
+        connection.on("write-single-register", makeReply);
+        connection.on("write-multiple-coils", makeReply);
+        connection.on("write-multiple-registers", makeReply);
       }
     });
   };
