@@ -3,7 +3,7 @@ const { ipcRenderer } = require("electron");
 const addLog = (div, message) => {
   // console.log("addLog", message);
   const date = new Date();
-  const formattedTime = date.getHours() + ":" + ("0" + date.getMinutes()).substr(-2) + ":" + ("0" + date.getSeconds()).substr(-2);
+  const formattedTime = date.getHours() + ":" + ("0" + date.getMinutes()).substr(-2) + ":" + ("0" + date.getSeconds()).substr(-2) + " " + ("0" + date.getMilliseconds()).substr(-3);
 
   div.innerHTML += `(${formattedTime}) ${message}\r\n`;
   if (div.isScrollBottom) {

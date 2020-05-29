@@ -310,7 +310,6 @@ const makeRtuSession = () => {
           }
           modbusAscii = null;
           btn.innerHTML = "열기";
-          addLog(log, `${path} 닫기 완료`);
         });
       }
       document.querySelector(".modbus-rtu-ascii-sessions").removeChild(temp);

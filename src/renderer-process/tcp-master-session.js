@@ -83,6 +83,8 @@ const makeSession = () => {
       return;
     }
 
+    addLog(log, "QUERY 전송.");
+
     switch (fc.selectedIndex) {
       case 0: //READ COILS (FC 01)
         modbus

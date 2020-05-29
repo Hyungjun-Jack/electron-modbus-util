@@ -73,7 +73,7 @@ const makeRtuSession = () => {
       case 0: // READ COILS (FC 01)
         modbusAscii.readCoils({ address: startAddress.value, quantity: quantity.value, extra: { slaveId: slaveAddressValue } }, (err, res) => {
           if (err) {
-            // console.log("err", err);
+            console.log("err", err);
             addLog(log, err.message);
           } else {
             console.log("res", res);
@@ -269,7 +269,6 @@ const makeRtuSession = () => {
           }
           modbusAscii = null;
           btn.innerHTML = "열기";
-          addLog(log, `${path} 닫기 완료`);
         });
       }
       document.querySelector(".modbus-rtu-ascii-sessions").removeChild(temp);

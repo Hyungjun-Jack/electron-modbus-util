@@ -83,7 +83,7 @@ const openSerialPort = (parameters) => {
         parameters.modbusRtu = connection;
 
         const makeReply = (req, reply) => {
-          // console.log(req, reply);
+          console.log(req, reply);
           let {
             slaveId,
             request: { code, address, quantity, value },
