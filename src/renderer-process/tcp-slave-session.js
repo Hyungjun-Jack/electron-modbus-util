@@ -41,6 +41,24 @@ const makeSession = () => {
     log.innerHTML = "";
   });
 
+  clone.getElementById("btnFakeResponse").addEventListener("click", (event) => {
+    let { serverSocket, clientSocket } = param;
+
+    if (!clientSocket) {
+      addLog(log, `TCP가 접송 중이 아닙니다.`);
+    }
+
+    let data = Buffer.alloc(10, 0);
+
+    data.writeUInt8(4, 5);
+    data.writeUInt8(1, 6);
+    data.writeUInt8(1, 7);
+    data.writeUInt8(1, 8);
+    data.writeUInt8(0x8d, 9);
+
+    clientSocket.write(data);
+  });
+
   clone.getElementById("btnConnect").addEventListener("click", (event) => {
     connect(param);
   });
