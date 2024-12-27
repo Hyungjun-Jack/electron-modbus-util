@@ -40,17 +40,17 @@
     }
   },
   "dependencies": {
-    "electron-log": "^4.1.1",
-    "electron-progressbar": "^1.2.0",
-    "electron-updater": "^4.2.5",
+    "electron-log": "^4.4.8",
+    "electron-progressbar": "^2.0.1",
+    "electron-updater": "^5.3.0",
     "hexer": "^1.5.0",
     "jsmodbus": "^3.1.6",
     "modbus-stream": "^0.44.0",
-    "serialport": "^8.0.7"
+    "serialport": "^10.4.0"
   },
   "devDependencies": {
-    "electron": "8.1.1",
-    "electron-builder": "^22.5.1",
-    "electron-rebuild": "^1.10.1"
+    "electron": "21.1.0",
+    "electron-builder": "^22.10.5",
+    "electron-rebuild": "^2.3.5"
   }
 }
