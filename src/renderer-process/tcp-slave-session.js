@@ -18,6 +18,7 @@ const makeSession = () => {
   const localPortNumber = clone.getElementById("localPortNubmer");
   const changeUnitId = clone.getElementById("changeUnitId");
   const changeTransactionId = clone.getElementById("changeTransactionId");
+  const sendInputChangeNotification = clone.getElementById("sendInputChangeNotification");
 
   const btn = clone.getElementById("btnConnect");
 
@@ -57,6 +58,52 @@ const makeSession = () => {
     data.writeUInt8(0x8d, 9);
 
     clientSocket.write(data);
+  });
+
+  let _sendICNTimer = null;
+  let _icnData = Buffer.alloc(11, 0);
+  _icnData.writeUInt8(5, 5); // length
+  _icnData.writeUInt8(1, 6); // unit id
+  _icnData.writeUInt8(3, 7); // function code
+  _icnData.writeUInt8(2, 8); // byte count
+  _icnData.writeUInt8(0, 9); // register value
+  _icnData.writeUInt8(0, 10); // register value
+
+  let _icnIndex = 0;
+
+  clone.getElementById("sendInputChangeNotification").addEventListener("click", (event) => {
+    let { serverSocket, clientSocket } = param;
+
+    if (!clientSocket) {
+      addLog(log, `TCP가 접송 중이 아닙니다.`);
+    }
+
+    if (sendInputChangeNotification.checked) {
+      if (_sendICNTimer === null) {
+        _sendICNTimer = setInterval(() => {
+          let { serverSocket, clientSocket } = param;
+
+          if (!clientSocket) {
+            addLog(log, `TCP가 접송 중이 아닙니다.`);
+
+            clearInterval(_sendICNTimer);
+            _sendICNTimer = null;
+
+            sendInputChangeNotification.checked = false;
+            return;
+          }
+
+          _icnData.writeUInt8(0xff & (0xff << _icnIndex++), 10);
+          if (_icnIndex > 8) {
+            _icnIndex = 0;
+          }
+          clientSocket.write(_icnData);
+        }, 100);
+      }
+    } else {
+      clearInterval(_sendICNTimer);
+      _sendICNTimer = null;
+    }
   });
 
   clone.getElementById("btnConnect").addEventListener("click", (event) => {
@@ -198,6 +245,10 @@ const makeConnection = (parameters) => {
 
     socket.on("end", () => {
       addLog(log, `접속 종료. ${remoteAddress}:${remotePort}`);
+      if (parameters.clientSocket) {
+        parameters.clientSocket.destroy();
+        parameters.clientSocket = null;
+      }
     });
   });
 
